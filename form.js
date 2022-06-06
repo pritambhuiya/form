@@ -1,40 +1,51 @@
+/* eslint-disable no-console */
+/* eslint-disable no-process-exit */
+process.stdin.setEncoding('utf8');
+const fs = require('fs');
 
-const readChunk = (placeHolders, index, message,) => {
-  process.stdin.on('data', (chunk) => {
-    placeHolders[index][message] = chunk.trim();
-    index++;
-    // console.log('\nchunk:\n', chunk);
-    // console.log(placeHolders);
-    if (index > 2) {
-      console.log(placeHolders);
-    }
-    readAllChunks(index);
+const formatHobbies = ({ hobbies }) => hobbies.split(',');
 
-  });
-
-  process.stdin.on('end', () => {
-    console.log('end');
-  });
-
-  process.stdin.on('close', () => {
-    console.log('close');
-  });
+const storeInJson = (responses) => {
+  responses.hobbies = formatHobbies(responses);
+  fs.writeFileSync('responses.json', JSON.stringify(responses), 'utf8');
 };
 
-const readAllChunks = (index) => {
-  process.stdin.setEncoding('utf8');
+const getQuery = (query) => query === 'dob' ? 'dob(yyyy-mm-dd)' : query;
 
-  const placeHolders = [{ name: '' }, { dob: '' }, { hobbies: '' }];
-  const field = Object.keys(placeHolders[index])[0];
-  const message = field === 'dob' ? 'dob(yyyy - mm - dd)' : field;
+const displayQuery = (query) => {
+  const message = getQuery(query);
+  console.log('Please enter your', message, ':');
+};
 
-  console.log(`Please enter your ${message} : `);
-  readChunk(placeHolders, index, message);
+const storeResponses = (responses, queries, index, chunk) => {
+  const field = queries[index];
+  responses[field] = chunk.trim();
+};
+
+const hasReachedEndOfInput = (queries, index) => index >= queries.length - 1;
+
+const getResponses = (queries) => {
+  let index = 0;
+  const responses = {};
+  displayQuery(queries[index]);
+
+  process.stdin.on('data', (chunk) => {
+    storeResponses(responses, queries, index, chunk);
+
+    if (hasReachedEndOfInput(queries, index)) {
+      storeInJson(responses);
+      console.log('Thank you');
+      process.exit(0);
+    }
+
+    index++;
+    displayQuery(queries[index]);
+  });
 };
 
 const main = () => {
-  const index = 0;
-  readAllChunks(index);
+  const queries = ['name', 'dob', 'hobbies'];
+  getResponses(queries);
 };
 
 main();
