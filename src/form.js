@@ -1,7 +1,7 @@
-/* eslint-disable no-console */
-/* eslint-disable no-process-exit */
 process.stdin.setEncoding('utf8');
 const fs = require('fs');
+
+const { ChunkValidator } = require('./chunkValidator.js');
 
 const formatHobbies = ({ hobbies }) => hobbies.split(',');
 
@@ -13,16 +13,20 @@ const storeInJson = (responses) => {
 const getQuery = (query) => query === 'dob' ? 'dob(yyyy-mm-dd)' : query;
 
 const displayQuery = (query) => {
-  const message = getQuery(query);
-  console.log('Please enter your', message, ':');
+  const field = getQuery(query);
+  console.log('Please enter your', field, ':');
 };
 
-const storeResponses = (responses, queries, index, chunk) => {
-  const field = queries[index];
+const storeResponses = (responses, chunk, field) => {
   responses[field] = chunk.trim();
 };
 
 const hasReachedEndOfInput = (queries, index) => index >= queries.length - 1;
+
+const isChunkValid = (chunk, field) => {
+  const validator = new ChunkValidator(chunk);
+  return validator[field]();
+};
 
 const getResponses = (queries) => {
   let index = 0;
@@ -30,15 +34,18 @@ const getResponses = (queries) => {
   displayQuery(queries[index]);
 
   process.stdin.on('data', (chunk) => {
-    storeResponses(responses, queries, index, chunk);
+    const field = queries[index];
+    if (isChunkValid(chunk, field)) {
+      storeResponses(responses, chunk, field);
 
-    if (hasReachedEndOfInput(queries, index)) {
-      storeInJson(responses);
-      console.log('Thank you');
-      process.exit(0);
+      if (hasReachedEndOfInput(queries, index)) {
+        storeInJson(responses);
+        console.log('Thank you');
+        process.exit(0);
+      }
+
+      index++;
     }
-
-    index++;
     displayQuery(queries[index]);
   });
 };
