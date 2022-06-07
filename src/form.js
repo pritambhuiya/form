@@ -4,13 +4,19 @@ const fs = require('fs');
 const { ChunkValidator } = require('./chunkValidator.js');
 
 const formatHobbies = ({ hobbies }) => hobbies.split(',');
+const formatAddress = ({ address }) => address.join('\n');
+
+const formatResponses = (responses) => {
+  responses.address = formatAddress(responses);
+  responses.hobbies = formatHobbies(responses);
+};
 
 const writeContent = (content) => {
   fs.writeFileSync('responses.json', content, 'utf8');
 };
 
 const storeInJson = (responses) => {
-  responses.hobbies = formatHobbies(responses);
+  formatResponses(responses);
   writeContent(JSON.stringify(responses));
 };
 
@@ -21,22 +27,32 @@ const displayQuery = (query) => {
   console.log('Please enter your', field, ':');
 };
 
+const isAddressField = (field) => field.startsWith('addressLine');
+
 const storeResponses = (responses, chunk, field) => {
-  responses[field] = chunk.trim();
+  const trimmedChunk = chunk.trim();
+
+  isAddressField(field)
+    ? responses.address.push(trimmedChunk) : responses[field] = trimmedChunk;
 };
 
 const hasReachedEndOfInput = (queries, index) => index >= queries.length - 1;
 
 const isChunkValid = (chunk, field) => {
+  if (isAddressField(field)) {
+    return true;
+  }
+
   const validator = new ChunkValidator(chunk);
   return validator[field]();
 };
 
 const getResponses = (queries) => {
   let index = 0;
-  const responses = {};
-  displayQuery(queries[index]);
+  const responses =
+    { name: '', dob: '', hobbies: [], phoneNo: '', address: [] };
 
+  displayQuery(queries[index]);
   process.stdin.on('data', (chunk) => {
     const field = queries[index];
 
@@ -56,7 +72,8 @@ const getResponses = (queries) => {
 };
 
 const main = () => {
-  const queries = ['name', 'dob', 'hobbies', 'phoneNo'];
+  const queries =
+    ['name', 'dob', 'hobbies', 'phoneNo', 'addressLine1', 'addressLine2'];
   getResponses(queries);
 };
 
