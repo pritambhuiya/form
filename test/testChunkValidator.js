@@ -42,4 +42,29 @@ describe('ChunkValidator', () => {
     const validator = new ChunkValidator('\n');
     assert.strictEqual(validator.hobbies(), false);
   });
+
+  it('Should return true if phoneNo has only 10 digits and only numeric', () => {
+    const validator = new ChunkValidator('1234567890');
+    assert.strictEqual(validator.phoneNo(), true);
+  });
+
+  it('Should return true if phoneNo has only 10 digits and only numeric with new line', () => {
+    const validator = new ChunkValidator('1234567890\n');
+    assert.strictEqual(validator.phoneNo(), true);
+  });
+
+  it('Should return false if phoneNo has more than 10 digits', () => {
+    const validator = new ChunkValidator('12345678901');
+    assert.strictEqual(validator.phoneNo(), false);
+  });
+
+  it('Should return false if phoneNo has less than 10 digits', () => {
+    const validator = new ChunkValidator('123456789');
+    assert.strictEqual(validator.phoneNo(), false);
+  });
+
+  it('Should return false if phoneNo is alphaNumeric', () => {
+    const validator = new ChunkValidator('123456789a');
+    assert.strictEqual(validator.phoneNo(), false);
+  });
 });

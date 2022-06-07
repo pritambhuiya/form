@@ -5,9 +5,13 @@ const { ChunkValidator } = require('./chunkValidator.js');
 
 const formatHobbies = ({ hobbies }) => hobbies.split(',');
 
+const writeContent = (content) => {
+  fs.writeFileSync('responses.json', content, 'utf8');
+};
+
 const storeInJson = (responses) => {
   responses.hobbies = formatHobbies(responses);
-  fs.writeFileSync('responses.json', JSON.stringify(responses), 'utf8');
+  writeContent(JSON.stringify(responses));
 };
 
 const getQuery = (query) => query === 'dob' ? 'dob(yyyy-mm-dd)' : query;
@@ -35,6 +39,7 @@ const getResponses = (queries) => {
 
   process.stdin.on('data', (chunk) => {
     const field = queries[index];
+
     if (isChunkValid(chunk, field)) {
       storeResponses(responses, chunk, field);
 
@@ -51,7 +56,7 @@ const getResponses = (queries) => {
 };
 
 const main = () => {
-  const queries = ['name', 'dob', 'hobbies'];
+  const queries = ['name', 'dob', 'hobbies', 'phoneNo'];
   getResponses(queries);
 };
 

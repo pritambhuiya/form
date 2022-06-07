@@ -5,16 +5,17 @@ class ChunkValidator {
     this.#chunk = chunk;
   }
 
-  #isNamesLengthLessThanFive() {
+  #isLengthLessThanFive() {
     return this.#chunk.length < 5;
   }
 
-  #doNameHasOnlyLetters() {
-    return this.#chunk.split('').every((character) => !parseInt(character));
+  #isNameWord() {
+    const letters = this.#chunk.split('');
+    return !isStringNumeric(letters);
   }
 
   name() {
-    return this.#isNamesLengthLessThanFive() && this.#doNameHasOnlyLetters();
+    return this.#isLengthLessThanFive() && this.#isNameWord();
   }
 
   #isDobInYearMonthDateOrder(seperator) {
@@ -22,7 +23,8 @@ class ChunkValidator {
   }
 
   #isDobNumeric() {
-    return this.#chunk.split('-').every((character) => isFinite(character));
+    const dateArray = this.#chunk.split('-');
+    return isStringNumeric(dateArray);
   }
 
   dob() {
@@ -32,6 +34,23 @@ class ChunkValidator {
   hobbies() {
     return this.#chunk !== '\n';
   }
+
+  #isLengthTen() {
+    return this.#chunk.trim().length === 10;
+  }
+
+  #isPhoneNumberNumeric() {
+    const letters = this.#chunk.split('');
+    return isStringNumeric(letters);
+  }
+
+  phoneNo() {
+    return this.#isLengthTen() && this.#isPhoneNumberNumeric();
+  }
 }
+
+const isStringNumeric = (string) => {
+  return string.every((character) => isFinite(character));
+};
 
 exports.ChunkValidator = ChunkValidator;
