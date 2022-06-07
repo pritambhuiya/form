@@ -1,7 +1,12 @@
+/* eslint-disable no-param-reassign */
 process.stdin.setEncoding('utf8');
 const fs = require('fs');
 
 const { ChunkValidator } = require('./chunkValidator.js');
+
+const writeContent = (content) => {
+  fs.writeFileSync('responses.json', content, 'utf8');
+};
 
 const formatHobbies = ({ hobbies }) => hobbies.split(',');
 const formatAddress = ({ address }) => address.join('\n');
@@ -11,20 +16,9 @@ const formatResponses = (responses) => {
   responses.hobbies = formatHobbies(responses);
 };
 
-const writeContent = (content) => {
-  fs.writeFileSync('responses.json', content, 'utf8');
-};
-
 const storeInJson = (responses) => {
   formatResponses(responses);
   writeContent(JSON.stringify(responses));
-};
-
-const getQuery = (query) => query === 'dob' ? 'dob(yyyy-mm-dd)' : query;
-
-const displayQuery = (query) => {
-  const field = getQuery(query);
-  console.log('Please enter your', field, ':');
 };
 
 const isAddressField = (field) => field.startsWith('addressLine');
@@ -34,6 +28,13 @@ const storeResponses = (responses, chunk, field) => {
 
   isAddressField(field)
     ? responses.address.push(trimmedChunk) : responses[field] = trimmedChunk;
+};
+
+const getQuery = (query) => query === 'dob' ? 'dob(yyyy-mm-dd)' : query;
+
+const displayQuery = (query) => {
+  const field = getQuery(query);
+  console.log('Please enter your', field, ':');
 };
 
 const hasReachedEndOfInput = (queries, index) => index >= queries.length - 1;
@@ -47,12 +48,7 @@ const isChunkValid = (chunk, field) => {
   return validator[field]();
 };
 
-const getResponses = (queries) => {
-  let index = 0;
-  const responses =
-    { name: '', dob: '', hobbies: [], phoneNo: '', address: [] };
-
-  displayQuery(queries[index]);
+const parseInputs = (responses, queries, index) => {
   process.stdin.on('data', (chunk) => {
     const field = queries[index];
 
@@ -69,6 +65,15 @@ const getResponses = (queries) => {
     }
     displayQuery(queries[index]);
   });
+};
+
+const getResponses = (queries) => {
+  const index = 0;
+  const responses =
+    { name: '', dob: '', hobbies: [], phoneNo: '', address: [] };
+
+  displayQuery(queries[index]);
+  parseInputs(responses, queries, index);
 };
 
 const main = () => {
