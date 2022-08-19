@@ -1,12 +1,9 @@
-/* eslint-disable no-param-reassign */
 process.stdin.setEncoding('utf8');
 const fs = require('fs');
 
 const { ChunkValidator } = require('./chunkValidator.js');
 
-const writeContent = (content) => {
-  fs.writeFileSync('responses.json', content, 'utf8');
-};
+const writeContent = (content) => fs.writeFileSync('responses.json', content, 'utf8');
 
 const formatHobbies = ({ hobbies }) => hobbies.split(',');
 const formatAddress = ({ address }) => address.join('\n');
@@ -76,10 +73,4 @@ const getResponses = (queries) => {
   parseInputs(responses, queries, index);
 };
 
-const main = () => {
-  const queries =
-    ['name', 'dob', 'hobbies', 'phoneNo', 'addressLine1', 'addressLine2'];
-  getResponses(queries);
-};
-
-main();
+module.exports = { getResponses };
